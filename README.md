@@ -51,41 +51,41 @@ env ANKR_API_KEY=<YOUR_KEY> npx -y @w3tech.io/agent-rpc-mcp
 
 **Raw RPC, TORPC tier 2**
 
-| Tool | What it answers |
-| --- | --- |
-| `getTransaction` | transaction + receipt by hash, ABI-decoded |
-| `getLogs` | event logs, decoded; wide block ranges are chunk-scanned and paged |
-| `getBlock` | block header, optionally with decoded transactions |
+| Tool             | What it answers                                                    |
+| ---------------- | ------------------------------------------------------------------ |
+| `getTransaction` | transaction + receipt by hash, ABI-decoded                         |
+| `getLogs`        | event logs, decoded; wide block ranges are chunk-scanned and paged |
+| `getBlock`       | block header, optionally with decoded transactions                 |
 
 **Indexed and mixed**
 
-| Tool | What it answers |
-| --- | --- |
-| `getBalances` | native coin + ERC-20 balances with USD |
-| `getAccountBalance` | balances across many chains at once |
-| `getWalletActivity` | an address's transaction history, paged |
-| `getNFTs` | NFTs held by an address |
-| `getTokenHolders` | holders of an ERC-20, paged |
-| `getTokenPrice` | USD price with chain, asset and `as_of` provenance |
-| `getTokenPriceHistory` | historical price series for a token |
-| `getInteractions` | which chains an address has touched, cross-chain |
-| `resolveContract` | is-contract, best-effort ERC-20 metadata, EIP-1967 proxy |
-| `searchChain` | resolve a tx/block hash, an address, or a block number |
-| `expandResult` | continue any paged result from its cursor |
+| Tool                   | What it answers                                          |
+| ---------------------- | -------------------------------------------------------- |
+| `getBalances`          | native coin + ERC-20 balances with USD                   |
+| `getAccountBalance`    | balances across many chains at once                      |
+| `getWalletActivity`    | an address's transaction history, paged                  |
+| `getNFTs`              | NFTs held by an address                                  |
+| `getTokenHolders`      | holders of an ERC-20, paged                              |
+| `getTokenPrice`        | USD price with chain, asset and `as_of` provenance       |
+| `getTokenPriceHistory` | historical price series for a token                      |
+| `getInteractions`      | which chains an address has touched, cross-chain         |
+| `resolveContract`      | is-contract, best-effort ERC-20 metadata, EIP-1967 proxy |
+| `searchChain`          | resolve a tx/block hash, an address, or a block number   |
+| `expandResult`         | continue any paged result from its cursor                |
 
 **Discovery and escape hatch**
 
-| Tool | What it answers |
-| --- | --- |
-| `listChains` | supported chains, max TORPC tier, indexer availability |
+| Tool              | What it answers                                                                                           |
+| ----------------- | --------------------------------------------------------------------------------------------------------- |
+| `listChains`      | supported chains, max TORPC tier, indexer availability                                                    |
 | `describeMethods` | the param shape and a worked example per JSON-RPC method, plus whether your key may call it on that chain |
-| `rpcCall` | any read method the routed tools do not cover |
+| `rpcCall`         | any read method the routed tools do not cover                                                             |
 
-17 tools in total.
+That is the whole set: **17 tools**.
 
 ### What `rpcCall` will and will not do
 
-`rpcCall` is a read and data escape hatch, never a wallet. It is a **write denylist, not a read allowlist**: it refuses transaction broadcast and signing, transaction *building*, node and dev-node administration, mutating verbs, and the node-operation half of geth's `debug_*` namespace — on every chain family — and **forwards everything else**.
+`rpcCall` is a read and data escape hatch, never a wallet. It is a **write denylist, not a read allowlist**: it refuses transaction broadcast and signing, transaction _building_, node and dev-node administration, mutating verbs, and the node-operation half of geth's `debug_*` namespace — on every chain family — and **forwards everything else**.
 
 It therefore keeps no list of permitted reads. Which reads exist is decided per chain by the endpoint's blockchain schema and by what your tenant may call, so a forwarded read can still come back refused (`Method disabled, reason: restricted by blockchain schema`). That refusal is the authoritative answer; `listChains` reports coverage.
 
@@ -97,7 +97,7 @@ Sign and send transactions with your own wallet or signer.
 
 Two fields decide how to read every result, and an agent that skips them will misread output that is technically correct.
 
-**`tier_degraded`** — the TORPC tier is negotiated **per call and is not guaranteed**. A response above the proxy's compression budget comes back at tier 0: raw, undecoded, no `args`. When that happens the body says so with `tier_degraded: true`, alongside `_meta.tier` for the tier actually applied. Check `tier_degraded` before looking for decoded fields.
+**`_meta.tier`** — the TORPC tier is negotiated **per call and is not guaranteed**. A response comes back at tier 0 (raw, undecoded, no `args`) when it is above the proxy's compression budget, and also when the method is one the proxy does not compress at all, such as `eth_call`, `eth_getCode` and `eth_getStorageAt`. Every response carries the tier actually applied in `_meta.tier`, so check it before looking for decoded fields. `getBlock`, `getTransaction`, `getLogs` and `expandResult` request tier 2 for you, so they additionally report `tier_degraded: true` in the body with a note on how to narrow the request; `rpcCall` passes your tier through unchanged and sets no such field, so there `_meta.tier` is the only signal.
 
 **Decoded amounts are raw base units**, with no decimals applied. `args.value: "41695680"` on a 6-decimal token is 41.69568, not 41 million. Read the token's decimals with `resolveContract` before reporting a human number.
 
@@ -109,15 +109,15 @@ Tool inputs are **strict**: an unknown argument is rejected with a validation er
 
 ## TORPC tiers
 
-| Tier | Meaning |
-| --- | --- |
-| 0 | passthrough — standard JSON-RPC |
-| 1 | hex → decimal, plus field renaming |
-| 2 | full — ABI decode (function/event with named args), log collapse, `logsBloom` dropped |
+| Tier | Meaning                                                                               |
+| ---- | ------------------------------------------------------------------------------------- |
+| 0    | passthrough — standard JSON-RPC                                                       |
+| 1    | hex → decimal, plus field renaming                                                    |
+| 2    | full — ABI decode (function/event with named args), log collapse, `logsBloom` dropped |
 
 Negotiation is by header: `Accept-Token-Tier: 0|1|2` on the request, `Token-Tier` on the response. The proxy applies the requested tier only while the response stays inside its compression budget, and that budget is internal to the proxy — so this server never predicts the tier, it detects the applied one and reports it.
 
-Specification: [github.com/w3tech/torpc](https://github.com/w3tech/torpc).
+Specification: the TORPC section of [ankr.com/docs](https://www.ankr.com/docs/). The spec repository is not published yet; this line gets its link when it is.
 
 ---
 
@@ -139,7 +139,7 @@ A second, separate MCP surface at `https://mcp.ankr.com/mcp` covers account mana
 
 - API keys and plans: [ankr.com/rpc](https://www.ankr.com/rpc/)
 - Documentation: [ankr.com/docs](https://www.ankr.com/docs/) — see the AI Agents section
-- TORPC specification: [github.com/w3tech/torpc](https://github.com/w3tech/torpc)
+- TORPC specification: the TORPC section of [ankr.com/docs](https://www.ankr.com/docs/)
 - npm package: [`@w3tech.io/agent-rpc-mcp`](https://www.npmjs.com/package/@w3tech.io/agent-rpc-mcp)
 
 ## License

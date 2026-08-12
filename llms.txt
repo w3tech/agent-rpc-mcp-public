@@ -32,5 +32,5 @@
 - Every tool result carries `_meta.tier` (the applied tier) and `_meta.token_count` (a real o200k_base count of the emitted text).
 
 ## Spec & source
-- Spec: https://github.com/w3tech/torpc
+- Spec: the TORPC section of https://www.ankr.com/docs/ (spec repository not published yet)
 - Docs: https://www.ankr.com/docs/ (AI Agents section)
