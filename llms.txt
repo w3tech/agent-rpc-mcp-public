@@ -1,0 +1,36 @@
+# Ankr Agent RPC MCP Server
+
+> Token-efficient blockchain data for AI agents. Routed MCP tools over Ankr RPC with TORPC tier-2 response compression: ERC-20/contract calls and event logs are ABI-decoded, hex becomes decimal, and verbose fields (logsBloom, header roots) are dropped — typically 25-58% fewer tokens on decode-heavy reads (transactions, receipts, logs).
+
+## Install
+- Local (stdio): `npx -y @w3tech.io/agent-rpc-mcp` with env `ANKR_API_KEY`
+- Get a key: https://www.ankr.com/rpc/
+
+## Tools
+- describeMethods: param shape and a worked example per JSON-RPC method, plus whether this key may call it on this chain (probe:true asks the node)
+- expandResult: continue a paged result using an opaque cursor
+- getAccountBalance: multi-chain balances, prose format, capped and reports what it withheld (AAPI)
+- getBalances: native coin (tier 1) + ERC-20 token balances with USD (AAPI)
+- getBlock: block header (+ optional decoded txs), TORPC tier 2
+- getInteractions: which chains an address has interacted with, cross-chain (AAPI)
+- getLogs: event logs, decoded, chunk-scanned over wide ranges and paged, TORPC tier 2
+- getNFTs: NFTs held by an address (AAPI)
+- getTokenHolders: holders of an ERC-20, paged (AAPI)
+- getTokenPrice: USD price with chain, asset and as_of provenance
+- getTokenPriceHistory: historical price series for a token (AAPI)
+- getTransaction: transaction + receipt by hash, ABI-decoded, TORPC tier 2
+- getWalletActivity: address transaction history (AAPI), paged via cursor
+- listChains: supported chains, max TORPC tier, AAPI availability
+- resolveContract: is-contract, best-effort ERC-20 metadata, EIP-1967 proxy (tier-0 passthrough)
+- rpcCall: any read method not covered by a routed tool. It keeps NO list of permitted reads: it refuses writes (broadcast, signing, tx building, node/wallet admin, mutating verbs) and forwards everything else, so which reads exist is decided per chain by the endpoint's blockchain schema and your tenant
+- searchChain: resolve a tx/block hash, 0x address, or block number
+
+## Protocol
+- TORPC tier negotiation: request header `Accept-Token-Tier: 0|1|2`; response header `Token-Tier`.
+- Tier 0 = passthrough, 1 = hex->decimal, 2 = full (ABI decode + log collapse).
+- The tier is negotiated PER CALL and is not guaranteed: a response over the proxy's compression budget comes back at tier 0. Check `tier_degraded` in the body before looking for decoded fields.
+- Every tool result carries `_meta.tier` (the applied tier) and `_meta.token_count` (a real o200k_base count of the emitted text).
+
+## Spec & source
+- Spec: https://github.com/w3tech/torpc
+- Docs: https://www.ankr.com/docs/ (AI Agents section)

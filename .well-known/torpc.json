@@ -1,0 +1,52 @@
+{
+  "torpc": {
+    "version": "1.1",
+    "endpoint": "https://rpc.ankr.com/<chain>/<key>",
+    "negotiation": {
+      "requestHeader": "Accept-Token-Tier",
+      "responseHeader": "Token-Tier",
+      "legacyAlias": "Rpc-Compress",
+      "values": [0, 1, 2]
+    },
+    "tiers": {
+      "0": "passthrough (standard JSON-RPC)",
+      "1": "hex to decimal + field rename",
+      "2": "full: ABI decode (function/event + named args) + log collapse + logsBloom drop + hex to decimal"
+    },
+    "fullTier2Methods": [
+      "eth_getTransactionByHash",
+      "eth_getTransactionReceipt",
+      "eth_getBlockByHash",
+      "eth_getBlockByNumber",
+      "eth_getBlockReceipts",
+      "eth_getLogs",
+      "eth_getTransactionByBlockHashAndIndex",
+      "eth_getTransactionByBlockNumberAndIndex"
+    ],
+    "notSupported": ["eth_call", "eth_getCode", "eth_getStorageAt"]
+  },
+  "mcp": {
+    "package": "@w3tech.io/agent-rpc-mcp",
+    "transport": ["stdio", "streamable-http"],
+    "tools": [
+      "describeMethods",
+      "expandResult",
+      "getAccountBalance",
+      "getBalances",
+      "getBlock",
+      "getInteractions",
+      "getLogs",
+      "getNFTs",
+      "getTokenHolders",
+      "getTokenPrice",
+      "getTokenPriceHistory",
+      "getTransaction",
+      "getWalletActivity",
+      "listChains",
+      "resolveContract",
+      "rpcCall",
+      "searchChain"
+    ]
+  },
+  "spec": "https://github.com/w3tech/torpc"
+}
