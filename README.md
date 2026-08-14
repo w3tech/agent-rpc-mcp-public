@@ -117,7 +117,7 @@ Tool inputs are **strict**: an unknown argument is rejected with a validation er
 
 Negotiation is by header: `Accept-Token-Tier: 0|1|2` on the request, `Token-Tier` on the response. The proxy applies the requested tier only while the response stays inside its compression budget, and that budget is internal to the proxy — so this server never predicts the tier, it detects the applied one and reports it.
 
-Specification: [w3tech/torpc](https://github.com/w3tech/torpc), released under CC0-1.0, with the [TORPC docs page](https://www.ankr.com/docs/rpc-service/torpc/) as the narrative version. The reference decoder and the benchmark harness live in [w3tech/torpc-js](https://github.com/w3tech/torpc-js). The EVM tier-1 and tier-2 rules are normative in the spec today; the conformance suite is a scaffold, so no implementation, this one included, claims conformance yet.
+Specification: [w3tech/torpc](https://github.com/w3tech/torpc), released under CC0-1.0, with the [TORPC docs page](https://www.ankr.com/docs/agentic-rpc/torpc/) as the narrative version. The reference decoder and the benchmark harness live in [w3tech/torpc-js](https://github.com/w3tech/torpc-js). The EVM tier-1 and tier-2 rules are normative in the spec today; the conformance suite is a scaffold, so no implementation, this one included, claims conformance yet.
 
 ---
 
@@ -137,9 +137,10 @@ A second, separate MCP surface at `https://mcp.ankr.com/mcp` covers account mana
 
 ## Links
 
+- Documentation hub: [Agentic RPC](https://www.ankr.com/docs/agentic-rpc/overview/) on ankr.com/docs
 - API keys and plans: [ankr.com/rpc](https://www.ankr.com/rpc/)
-- Documentation: [Agent RPC](https://www.ankr.com/docs/rpc-service/mcp/agent-rpc/) and [account management](https://www.ankr.com/docs/rpc-service/mcp/management/) on ankr.com/docs
-- TORPC specification: [w3tech/torpc](https://github.com/w3tech/torpc) (CC0-1.0), narrated on the [TORPC docs page](https://www.ankr.com/docs/rpc-service/torpc/)
+- Documentation: [Agent RPC](https://www.ankr.com/docs/agentic-rpc/agent-rpc-mcp/) and [account management](https://www.ankr.com/docs/rpc-service/getting-started/management-mcp/) on ankr.com/docs
+- TORPC specification: [w3tech/torpc](https://github.com/w3tech/torpc) (CC0-1.0), narrated on the [TORPC docs page](https://www.ankr.com/docs/agentic-rpc/torpc/)
 - TORPC reference implementation: [w3tech/torpc-js](https://github.com/w3tech/torpc-js) (Apache-2.0)
 - npm package: [`@w3tech.io/agent-rpc-mcp`](https://www.npmjs.com/package/@w3tech.io/agent-rpc-mcp)
 
