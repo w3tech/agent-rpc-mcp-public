@@ -1,0 +1,9 @@
+# This repository is the public home of the Ankr Agent RPC MCP server: every file
+# in it is customer facing, and the npm package points its `repository`,
+# `homepage` and `bugs` fields here. So everything needs a second reader.
+
+# Individuals, not a team. A CODEOWNERS entry naming a team that this repository
+# cannot see is ignored without an error, and no team holds write access here.
+# Both accounts below were checked to have write access, which is the other way
+# an entry gets silently dropped.
+*  @memekas @askolesov
