@@ -32,5 +32,7 @@
 - Every tool result carries `_meta.tier` (the applied tier) and `_meta.token_count` (a real o200k_base count of the emitted text).
 
 ## Spec & source
-- Spec: the TORPC section of https://www.ankr.com/docs/ (spec repository not published yet)
-- Docs: https://www.ankr.com/docs/ (AI Agents section)
+- Spec: https://github.com/w3tech/torpc (CC0-1.0), narrated at https://www.ankr.com/docs/rpc-service/torpc/
+- Reference implementation: https://github.com/w3tech/torpc-js (Apache-2.0)
+- Docs: https://www.ankr.com/docs/rpc-service/mcp/agent-rpc/ and https://www.ankr.com/docs/rpc-service/mcp/management/
+- This server: https://github.com/w3tech/agent-rpc-mcp-public (MIT), package https://www.npmjs.com/package/@w3tech.io/agent-rpc-mcp
