@@ -1,0 +1,27 @@
+name: Publish to the MCP registry
+
+# Manual only. Publishing writes a permanent public listing, so it should be a
+# deliberate act, not a side effect of a merge.
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      # The io.github.w3tech namespace is proven by this token, not by a DNS record.
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install the publisher
+        run: |
+          curl -sSL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_amd64.tar.gz" \
+            | tar xz mcp-publisher
+
+      - name: Authenticate as the GitHub org
+        run: ./mcp-publisher login github-oidc
+
+      - name: Publish
+        run: ./mcp-publisher publish

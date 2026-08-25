@@ -1,0 +1,36 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.w3tech/agent-rpc-mcp",
+  "title": "Ankr Agent RPC",
+  "description": "Read chain data on 200+ networks: transactions, logs, balances, contracts, ABI-decoded.",
+  "version": "0.2.0",
+  "websiteUrl": "https://www.ankr.com/web3-api/agent-rpc/",
+  "repository": {
+    "url": "https://github.com/w3tech/agent-rpc-mcp-public",
+    "source": "github"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.ankr.com/rpc"
+    }
+  ],
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@w3tech.io/agent-rpc-mcp",
+      "version": "0.2.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "ANKR_API_KEY",
+          "description": "Ankr API key. Create one at ankr.com/rpc.",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}
