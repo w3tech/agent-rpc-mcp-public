@@ -8,6 +8,9 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    # Same release gate the npm publish uses in verifiable-rpc-sdk: a protected
+    # environment, so a human approves before anything leaves the org.
+    environment: prod
     permissions:
       # The io.github.w3tech namespace is proven by this token, not by a DNS record.
       id-token: write
