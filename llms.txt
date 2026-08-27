@@ -34,7 +34,7 @@
 ## Discovery
 - TORPC descriptor (protocol version, negotiation headers, tier meanings, method lists): https://mcp.ankr.com/.well-known/torpc.json, also served at https://rpc.ankr.com/.well-known/torpc.json
 - Agent card (ERC-8004 registration file: name, description, MCP endpoints, x402Support: false): https://mcp.ankr.com/.well-known/agent-card.json, also served at https://rpc.ankr.com/.well-known/agent-card.json
-- Both ship in the npm package under static/.well-known/. The served copy is authoritative; packaged copies can lag it.
+- Both ship in this package under static/.well-known/. The served copy is authoritative; a packaged copy can lag it.
 
 ## Spec & source
 - Spec: https://github.com/w3tech/torpc (CC0-1.0), narrated at https://www.ankr.com/docs/agentic-rpc/torpc/
