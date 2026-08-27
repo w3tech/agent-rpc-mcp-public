@@ -127,16 +127,14 @@ Specification: [w3tech/torpc](https://github.com/w3tech/torpc), released under C
 
 ## Discovery
 
-Two machine-readable documents describe this deployment. Both are public, carry no credential and are readable cross-origin.
+Two machine-readable documents describe this deployment. Both are public, carry no credential, and are readable cross-origin.
 
-| Document | Served at |
-| --- | --- |
-| TORPC descriptor: protocol version, negotiation headers, tier meanings, method lists | [`mcp.ankr.com/.well-known/torpc.json`](https://mcp.ankr.com/.well-known/torpc.json)<br>[`rpc.ankr.com/.well-known/torpc.json`](https://rpc.ankr.com/.well-known/torpc.json) |
+| Document                                                                                                                            | Served at                                                                                                                                                                                        |
+| ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| TORPC descriptor: protocol version, negotiation headers, tier meanings, method lists                                                | [`mcp.ankr.com/.well-known/torpc.json`](https://mcp.ankr.com/.well-known/torpc.json)<br>[`rpc.ankr.com/.well-known/torpc.json`](https://rpc.ankr.com/.well-known/torpc.json)                     |
 | Agent card: an [ERC-8004](https://eips.ethereum.org/EIPS/eip-8004) registration file naming who answers, and at which MCP endpoints | [`mcp.ankr.com/.well-known/agent-card.json`](https://mcp.ankr.com/.well-known/agent-card.json)<br>[`rpc.ankr.com/.well-known/agent-card.json`](https://rpc.ankr.com/.well-known/agent-card.json) |
 
-Both also ship in the npm package under `static/.well-known/`. Read the served copy as the deployment's own statement of what it supports: a packaged copy can lag it.
-
-The card lists the MCP services and states `x402Support: false`. It claims no on-chain registration and no trust mechanism, because there is none to claim.
+Both ship in this package under `static/.well-known/`, and the served copy is the deployment's own statement: a packaged copy can lag it. The card states `x402Support: false`, and claims no on-chain registration and no trust mechanism, because there is none to claim.
 
 ---
 
