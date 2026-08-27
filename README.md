@@ -2,7 +2,9 @@
 
 A [Model Context Protocol](https://modelcontextprotocol.io/) server that gives AI agents token-efficient access to blockchain data through Ankr RPC.
 
-Reads go out with the **TORPC** `Accept-Token-Tier: 2` header. When tier 2 is applied, contract calls and event logs come back ABI-decoded into named arguments, hex becomes decimal, and verbose fields (`logsBloom`, header roots) are dropped — typically **25–58% fewer tokens** on decode-heavy reads such as transactions, receipts and logs.
+Reads go out with the **TORPC** `Accept-Token-Tier: 2` header. Tier 1 already renames the fields, turns hex into decimal and drops the service fields (`logsBloom`, `cumulativeGasUsed`, header roots). Tier 2 adds the ABI decode on top, so contract calls and event logs come back as named arguments.
+
+A live run over 21 methods and 25 Ethereum mainnet blocks, token-weighted and counted with `o200k_base` over the full HTTP body, came out **48.4% smaller at tier 2** and 35.3% smaller at tier 1. Decode-heavy reads save the most: `eth_getTransactionByHash` 69.0%, `eth_getTransactionReceipt` 64.5%, `eth_getBlockReceipts` 60.3%, the block methods 40.4%, `eth_getLogs` 28.9%; scalar reads save 9–19%. Per-method figures: [live-token-savings-2026-07-17.md](https://github.com/w3tech/torpc-js/blob/main/bench/results/live-token-savings-2026-07-17.md).
 
 ---
 
@@ -109,15 +111,17 @@ Tool inputs are **strict**: an unknown argument is rejected with a validation er
 
 ## TORPC tiers
 
-| Tier | Meaning                                                                               |
-| ---- | ------------------------------------------------------------------------------------- |
-| 0    | passthrough — standard JSON-RPC                                                       |
-| 1    | hex → decimal, plus field renaming                                                    |
-| 2    | full — ABI decode (function/event with named args), log collapse, `logsBloom` dropped |
+| Tier | Meaning                                                                                                                                    |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| 0    | passthrough — standard JSON-RPC                                                                                                            |
+| 1    | field rename, hex → decimal, and the service fields dropped: `logsBloom`, `cumulativeGasUsed`, `contractAddress`, `type`, the header roots |
+| 2    | tier 1 plus the ABI decode — each log becomes `{contract, event, args}`, calldata becomes a decoded function with named args               |
 
 Negotiation is by header: `Accept-Token-Tier: 0|1|2` on the request, `Token-Tier` on the response. The proxy applies the requested tier only while the response stays inside its compression budget, and that budget is internal to the proxy — so this server never predicts the tier, it detects the applied one and reports it.
 
-Specification: [w3tech/torpc](https://github.com/w3tech/torpc), released under CC0-1.0, with the [TORPC docs page](https://www.ankr.com/docs/agentic-rpc/torpc/) as the narrative version. The reference decoder and the benchmark harness live in [w3tech/torpc-js](https://github.com/w3tech/torpc-js). The EVM tier-1 and tier-2 rules are normative in the spec today; the conformance suite is a scaffold, so no implementation, this one included, claims conformance yet.
+On a JSON-RPC **batch** that header describes the array, not any one element: a response array carries a single `Token-Tier`, and its value is the **minimum** tier applied across the elements. v1 defines no per-element tier signal, elements may sit above that floor, and a client reads each element's own tier from its shape — renamed fields and decimal strings for tier 1, `event`/`args` for tier 2 — rather than from the header. So the header is a floor and a signal that a transform was applied; which methods reach tier 2 is declared per method in the descriptor at [`https://mcp.ankr.com/.well-known/torpc.json`](https://mcp.ankr.com/.well-known/torpc.json), which also ships in the npm package at `static/.well-known/torpc.json`.
+
+Specification: [w3tech/torpc](https://github.com/w3tech/torpc), released under CC0-1.0, with the [TORPC docs page](https://www.ankr.com/docs/agentic-rpc/torpc/) as the narrative version. The reference decoder is published as [`@w3tech.io/torpc-decoder`](https://www.npmjs.com/package/@w3tech.io/torpc-decoder) (Apache-2.0); its source and the benchmark harness live in [w3tech/torpc-js](https://github.com/w3tech/torpc-js), under `codec/`. The EVM tier-1 and tier-2 rules are normative in the spec today; the conformance suite is a scaffold, so no implementation, this one included, claims conformance yet.
 
 ---
 
@@ -137,11 +141,10 @@ A second, separate MCP surface at `https://mcp.ankr.com/mcp` covers account mana
 
 ## Links
 
-- Documentation hub: [Agentic RPC](https://www.ankr.com/docs/agentic-rpc/overview/) on ankr.com/docs
 - API keys and plans: [ankr.com/rpc](https://www.ankr.com/rpc/)
 - Documentation: [Agent RPC](https://www.ankr.com/docs/agentic-rpc/agent-rpc-mcp/) and [account management](https://www.ankr.com/docs/rpc-service/getting-started/management-mcp/) on ankr.com/docs
 - TORPC specification: [w3tech/torpc](https://github.com/w3tech/torpc) (CC0-1.0), narrated on the [TORPC docs page](https://www.ankr.com/docs/agentic-rpc/torpc/)
-- TORPC reference implementation: [w3tech/torpc-js](https://github.com/w3tech/torpc-js) (Apache-2.0)
+- TORPC decoder: [`@w3tech.io/torpc-decoder`](https://www.npmjs.com/package/@w3tech.io/torpc-decoder) (Apache-2.0), source in [w3tech/torpc-js](https://github.com/w3tech/torpc-js) under `codec/`
 - npm package: [`@w3tech.io/agent-rpc-mcp`](https://www.npmjs.com/package/@w3tech.io/agent-rpc-mcp)
 
 ## License

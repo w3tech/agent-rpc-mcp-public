@@ -1,12 +1,14 @@
 {
   "torpc": {
-    "version": "1.1",
+    "version": "evm-v1",
+    "status": "draft",
     "endpoint": "https://rpc.ankr.com/<chain>/<key>",
     "negotiation": {
       "requestHeader": "Accept-Token-Tier",
       "responseHeader": "Token-Tier",
       "legacyAlias": "Rpc-Compress",
-      "values": [0, 1, 2]
+      "values": [0, 1, 2],
+      "batch": "one Token-Tier header per response array, carrying the minimum tier applied across its elements; v1 defines no per-element signal, so a client reads each element's tier from its shape"
     },
     "tiers": {
       "0": "passthrough (standard JSON-RPC)",
@@ -14,14 +16,20 @@
       "2": "full: ABI decode (function/event + named args) + log collapse + logsBloom drop + hex to decimal"
     },
     "fullTier2Methods": [
-      "eth_getTransactionByHash",
-      "eth_getTransactionReceipt",
       "eth_getBlockByHash",
       "eth_getBlockByNumber",
       "eth_getBlockReceipts",
       "eth_getLogs",
       "eth_getTransactionByBlockHashAndIndex",
-      "eth_getTransactionByBlockNumberAndIndex"
+      "eth_getTransactionByBlockNumberAndIndex",
+      "eth_getTransactionByHash",
+      "eth_getTransactionReceipt",
+      "eth_getUncleByBlockHashAndIndex",
+      "eth_getUncleByBlockNumberAndIndex"
+    ],
+    "noPayloadPostMerge": [
+      "eth_getUncleByBlockHashAndIndex",
+      "eth_getUncleByBlockNumberAndIndex"
     ],
     "notSupported": ["eth_call", "eth_getCode", "eth_getStorageAt"]
   },
@@ -48,5 +56,5 @@
       "searchChain"
     ]
   },
-  "spec": "https://www.ankr.com/docs/"
+  "spec": "https://github.com/w3tech/torpc/blob/main/specs/evm-v1.md"
 }
