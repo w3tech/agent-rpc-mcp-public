@@ -31,6 +31,11 @@
 - The tier is negotiated PER CALL and is not guaranteed: a response over the proxy's compression budget comes back at tier 0. Check `tier_degraded` in the body before looking for decoded fields.
 - Every tool result carries `_meta.tier` (the applied tier) and `_meta.token_count` (a real o200k_base count of the emitted text).
 
+## Discovery
+- TORPC descriptor (protocol version, negotiation headers, tier meanings, method lists): https://mcp.ankr.com/.well-known/torpc.json, also served at https://rpc.ankr.com/.well-known/torpc.json
+- Agent card (ERC-8004 registration file: name, description, MCP endpoints, x402Support: false): https://mcp.ankr.com/.well-known/agent-card.json, also served at https://rpc.ankr.com/.well-known/agent-card.json
+- Both ship in the npm package under static/.well-known/. The served copy is authoritative; packaged copies can lag it.
+
 ## Spec & source
 - Spec: https://github.com/w3tech/torpc (CC0-1.0), narrated at https://www.ankr.com/docs/rpc-service/torpc/
 - Reference implementation: https://github.com/w3tech/torpc-js (Apache-2.0)
