@@ -1,6 +1,6 @@
 # Ankr Agent RPC MCP Server
 
-> Token-efficient blockchain data for AI agents. Routed MCP tools over Ankr RPC with TORPC tier-2 response compression: ERC-20/contract calls and event logs are ABI-decoded, hex becomes decimal, and verbose fields (logsBloom, header roots) are dropped — typically 25-58% fewer tokens on decode-heavy reads (transactions, receipts, logs).
+> Token-efficient blockchain data for AI agents. Routed MCP tools over Ankr RPC with TORPC response compression: tier 1 renames the fields, turns hex into decimal and drops the service fields (logsBloom, cumulativeGasUsed, header roots); tier 2 adds the ABI decode, so ERC-20/contract calls and event logs come back as named arguments. Measured 2026-07-17 over 21 methods and 25 Ethereum mainnet blocks, token-weighted, o200k_base over the full HTTP body: 48.4% fewer tokens at tier 2 and 35.3% at tier 1. Decode-heavy reads save the most (eth_getTransactionByHash 69.0%, eth_getTransactionReceipt 64.5%, eth_getBlockReceipts 60.3%, eth_getLogs 28.9%).
 
 ## Install
 - Local (stdio): `npx -y @w3tech.io/agent-rpc-mcp` with env `ANKR_API_KEY`
@@ -26,9 +26,9 @@
 - searchChain: resolve a tx/block hash, 0x address, or block number
 
 ## Protocol
-- TORPC tier negotiation: request header `Accept-Token-Tier: 0|1|2`; response header `Token-Tier`.
-- Tier 0 = passthrough, 1 = hex->decimal, 2 = full (ABI decode + log collapse).
-- The tier is negotiated PER CALL and is not guaranteed: a response over the proxy's compression budget comes back at tier 0. Check `tier_degraded` in the body before looking for decoded fields.
+- TORPC tier negotiation: request header `Accept-Token-Tier: 0|1|2`; response header `Token-Tier`. A JSON-RPC batch gets ONE header for the whole array, carrying the MINIMUM tier applied across its elements; v1 has no per-element signal, so read each element's tier from its shape.
+- Tier 0 = passthrough. Tier 1 = field rename + hex->decimal + the service fields dropped (logsBloom, cumulativeGasUsed, contractAddress, type, the header roots). Tier 2 = tier 1 plus the ABI decode: each log becomes {contract, event, args} and calldata becomes a decoded function with named args.
+- The tier is negotiated PER CALL and is not guaranteed: a response over the proxy's compression budget comes back at tier 0, and so does any method the proxy does not compress. Read `_meta.tier` on the result before looking for decoded fields: snake_case names and decimal numbers prove tier 1 or better, only `args`/`event`/`function` prove tier 2. Some tools ADDITIONALLY set `tier_degraded: true` in the body with a note on how to narrow the request; not all of them do, so `_meta.tier` is the signal that always works.
 - Every tool result carries `_meta.tier` (the applied tier) and `_meta.token_count` (a real o200k_base count of the emitted text).
 
 ## Discovery
@@ -37,7 +37,8 @@
 - Both ship in the npm package under static/.well-known/. The served copy is authoritative; packaged copies can lag it.
 
 ## Spec & source
-- Spec: https://github.com/w3tech/torpc (CC0-1.0), narrated at https://www.ankr.com/docs/rpc-service/torpc/
-- Reference implementation: https://github.com/w3tech/torpc-js (Apache-2.0)
-- Docs: https://www.ankr.com/docs/rpc-service/mcp/agent-rpc/ and https://www.ankr.com/docs/rpc-service/mcp/management/
+- Spec: https://github.com/w3tech/torpc (CC0-1.0), narrated at https://www.ankr.com/docs/agentic-rpc/torpc/
+- Reference decoder: @w3tech.io/torpc-decoder (Apache-2.0), source at https://github.com/w3tech/torpc-js under codec/
+- Measured token savings: https://github.com/w3tech/torpc-js/blob/main/bench/results/live-token-savings-2026-07-17.md
+- Docs: https://www.ankr.com/docs/agentic-rpc/agent-rpc-mcp/ and https://www.ankr.com/docs/rpc-service/getting-started/management-mcp/
 - This server: https://github.com/w3tech/agent-rpc-mcp-public (MIT), package https://www.npmjs.com/package/@w3tech.io/agent-rpc-mcp
