@@ -18,6 +18,10 @@ FROM node:24-alpine
 ARG VERSION=0.2.3
 RUN npm install -g "@w3tech.io/agent-rpc-mcp@${VERSION}"
 
+# The package is installed as root; the server runs as the image's unprivileged
+# node user.
+USER node
+
 # The server speaks JSON-RPC over stdin and stdout. It writes nothing to stdout
 # that is not a protocol message.
 ENTRYPOINT ["agent-rpc-mcp"]
