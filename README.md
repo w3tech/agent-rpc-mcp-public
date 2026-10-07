@@ -83,7 +83,33 @@ env ANKR_API_KEY=<YOUR_KEY> npx -y @w3tech.io/agent-rpc-mcp
 | `describeMethods` | the param shape and a worked example per JSON-RPC method, plus whether your key may call it on that chain |
 | `rpcCall`         | any read method the routed tools do not cover                                                             |
 
-That is the whole set: **17 tools**.
+**Sui**
+
+Sui is not an EVM chain and is not reached through the JSON-RPC proxy at all: a
+Sui call goes out over gRPC. `getBalances`, `getBlock`, `getTransaction`,
+`getWalletActivity`, `getLogs` and `rpcCall` take `chain: "sui"` and route
+themselves — `getLogs` reads Move events over a checkpoint range, filtered by
+emitting package or module, event type and sender. `resolveContract` and
+`searchChain` are built from `eth_*` calls Sui has never had and refuse there,
+naming the tool that answers instead. A Move event row is `{contract, event,
+args}`, the same shape an EVM tier-2 log has — but its `args` arrives at tier 0,
+decoded by the node rather than from an ABI, so on this path it is not evidence
+of a tier.
+
+Eight tools serve what Sui has and an EVM chain does not:
+
+| Tool                     | What it answers                                                         |
+| ------------------------ | ----------------------------------------------------------------------- |
+| `suiGetObjects`          | Move objects by id, batched, with their decoded fields                  |
+| `suiListOwnedObjects`    | every object an address owns, paged, filterable by Move type            |
+| `suiListDynamicFields`   | tables, bags and dynamic object fields under one object's UID           |
+| `suiGetPackage`          | the modules a published Move package declares                           |
+| `suiGetFunction`         | one Move function's signature                                           |
+| `suiResolveName`         | a SuiNS name to its address, or an address to its name                  |
+| `suiSimulateTransaction` | what a transaction would do, run against current state, never submitted |
+| `suiWatchEvents`         | Move events from the executed tip on, polled from a resumable cursor    |
+
+That is the whole set: **25 tools**.
 
 ### What `rpcCall` will and will not do
 
@@ -99,7 +125,7 @@ Sign and send transactions with your own wallet or signer.
 
 Two fields decide how to read every result, and an agent that skips them will misread output that is technically correct.
 
-**`_meta.tier`** — the TORPC tier is negotiated **per call and is not guaranteed**. A response comes back at tier 0 (raw, undecoded, no `args`) when it is above the proxy's compression budget, and also when the method is one the proxy does not compress at all, such as `eth_call`, `eth_getCode` and `eth_getStorageAt`. Every successful response carries the tier actually applied in `_meta.tier`, so check it before looking for decoded fields; an error result carries `_meta.error_code` instead and no tier at all. Some tools additionally report `tier_degraded: true` in the body, with a note on how to narrow the request, when they asked for tier 2 on your behalf and got less. Not all of them do, so `_meta.tier` is the field to rely on.
+**`_meta.tier`** — the TORPC tier is negotiated **per call and is not guaranteed**. On the proxy path a response comes back at tier 0 (raw, undecoded, no `args`) when it is above the proxy's compression budget, and also when the method is one the proxy does not compress at all, such as `eth_call`, `eth_getCode` and `eth_getStorageAt`. Every successful response carries the tier actually applied in `_meta.tier`, so check it before looking for decoded fields; an error result carries `_meta.error_code` instead and no tier at all. Some tools additionally report `tier_degraded: true` in the body, with a note on how to narrow the request, when they asked for tier 2 on your behalf and got less. Not all of them do, so `_meta.tier` is the field to rely on. `_meta.tier_source` says who applied the tier, and the shape rule above is the proxy's alone: on the Sui gRPC path (`tier_source: "local"`) a Move event row carries `contract`, `event` and `args` at tier 0, because the node decodes a Move struct itself.
 
 **Decoded amounts are raw base units**, with no decimals applied. `args.value: "41695680"` on a 6-decimal token is 41.69568, not 41 million. Read the token's decimals with `resolveContract` before reporting a human number.
 
@@ -119,7 +145,7 @@ Tool inputs are **strict**: an unknown argument is rejected with a validation er
 
 Negotiation is by header: `Accept-Token-Tier: 0|1|2` on the request, `Token-Tier` on the response. The proxy applies the requested tier only while the response stays inside its compression budget, and that budget is internal to the proxy — so this server never predicts the tier, it detects the applied one and reports it.
 
-On a JSON-RPC **batch** that header describes the array, not any one element: a response array carries a single `Token-Tier`, and its value is the **minimum** tier applied across the elements. v1 defines no per-element tier signal, elements may sit above that floor, and a client reads each element's own tier from its shape — renamed fields and decimal strings for tier 1, `event`/`args` for tier 2 — rather than from the header. So the header is a floor and a signal that a transform was applied; which methods reach tier 2 is declared per method in the descriptor at [`https://mcp.ankr.com/.well-known/torpc.json`](https://mcp.ankr.com/.well-known/torpc.json), which also ships in the npm package at `static/.well-known/torpc.json`.
+On a JSON-RPC **batch** that header describes the array, not any one element: a response array carries a single `Token-Tier`, and its value is the **minimum** tier applied across the elements. v1 defines no per-element tier signal, elements may sit above that floor, and a client reads each element's own tier from the shape the proxy left on it — renamed fields and decimal strings for tier 1, `event`/`args` for tier 2 — rather than from the header. So the header is a floor and a signal that a transform was applied; which methods reach tier 2 is declared per method in the descriptor at [`https://mcp.ankr.com/.well-known/torpc.json`](https://mcp.ankr.com/.well-known/torpc.json), which also ships in the npm package at `static/.well-known/torpc.json`.
 
 Specification: [w3tech/torpc](https://github.com/w3tech/torpc), released under CC0-1.0, with the [TORPC docs page](https://www.ankr.com/docs/agentic-rpc/torpc/) as the narrative version. The reference decoder is published as [`@w3tech.io/torpc-decoder`](https://www.npmjs.com/package/@w3tech.io/torpc-decoder) (Apache-2.0); its source and the benchmark harness live in [w3tech/torpc-js](https://github.com/w3tech/torpc-js), under `codec/`. The EVM tier-1 and tier-2 rules are normative in the spec today; the conformance suite is a scaffold, so no implementation, this one included, claims conformance yet.
 

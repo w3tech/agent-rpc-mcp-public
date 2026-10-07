@@ -24,11 +24,25 @@
 - resolveContract: is-contract, best-effort ERC-20 metadata, EIP-1967 proxy (tier-0 passthrough)
 - rpcCall: any read method not covered by a routed tool. It keeps NO list of permitted reads: it refuses writes (broadcast, signing, tx building, node/wallet admin, mutating verbs) and forwards everything else, so which reads exist is decided per chain by the endpoint's blockchain schema and your tenant
 - searchChain: resolve a tx/block hash, 0x address, or block number
+- suiGetFunction: one Move function's signature on Sui
+- suiGetObjects: Move objects by id, batched, with their decoded fields (Sui)
+- suiGetPackage: the modules a published Move package declares (Sui)
+- suiListDynamicFields: tables, bags and dynamic object fields under one object's UID (Sui)
+- suiListOwnedObjects: every object a Sui address owns, paged, filterable by Move type
+- suiResolveName: a SuiNS name to the address it points at, or an address to its own default name (reverse is not the inverse of forward)
+- suiSimulateTransaction: what a Sui transaction would do, run against current state and never submitted
+- suiWatchEvents: Sui Move events from the executed tip on, polled from a resumable cursor
+
+## Sui
+- Sui is not an EVM chain and is not served by the JSON-RPC proxy: a Sui call goes out over gRPC. getBalances, getBlock, getTransaction, getWalletActivity, getLogs and rpcCall take chain "sui" and route themselves; resolveContract and searchChain are built from eth_* calls Sui has never had and refuse there, naming the tool that answers instead.
+- getLogs on Sui reads Move events (LedgerService.ListEvents) over an inclusive CHECKPOINT range, so fromBlock is required; address is the emitting package[::module], eventType and sender narrow it, topics is refused. The body keeps getLogs' own keys and pages with a cursor expandResult continues; on Sui every row carries the event's struct under `args`, decoded by the node rather than from an ABI, at tier 0 — `args` here is not the proxy's tier-2 decode.
+- rpcCall bridges a fixed set of sui_/suix_ methods onto the gRPC API and REFUSES the rest rather than sending them to Sui's JSON-RPC, which Sui removes from full-node software in mid-October 2026. describeMethods reports which are bridged.
+- Sui ids are 0x + 64 hex; a transaction or checkpoint is a base58 digest. Balances are raw base units. These responses carry `_meta.tier_source: "local"` because the tier is applied in this server rather than by the proxy.
 
 ## Protocol
 - TORPC tier negotiation: request header `Accept-Token-Tier: 0|1|2`; response header `Token-Tier`. A JSON-RPC batch gets ONE header for the whole array, carrying the MINIMUM tier applied across its elements; v1 has no per-element signal, so read each element's tier from its shape.
 - Tier 0 = passthrough. Tier 1 = field rename + hex->decimal + the service fields dropped (logsBloom, cumulativeGasUsed, contractAddress, type, the header roots). Tier 2 = tier 1 plus the ABI decode: each log becomes {contract, event, args} and calldata becomes a decoded function with named args.
-- The tier is negotiated PER CALL and is not guaranteed: a response over the proxy's compression budget comes back at tier 0, and so does any method the proxy does not compress. Read `_meta.tier` on the result before looking for decoded fields: snake_case names and decimal numbers prove tier 1 or better, only `args`/`event`/`function` prove tier 2. Some tools ADDITIONALLY set `tier_degraded: true` in the body with a note on how to narrow the request; not all of them do, so `_meta.tier` is the signal that always works.
+- The tier is negotiated PER CALL and is not guaranteed: a response over the proxy's compression budget comes back at tier 0, and so does any method the proxy does not compress. Read `_meta.tier` on the result before looking for decoded fields: on the proxy path (`_meta.tier_source: "proxy"`) snake_case names and decimal numbers prove tier 1 or better, and only `args`/`event`/`function` prove tier 2. That last inference is the proxy's alone — see the Sui section, where a row carries `args` at tier 0. Some tools ADDITIONALLY set `tier_degraded: true` in the body with a note on how to narrow the request; not all of them do, so `_meta.tier` is the signal that always works.
 - Every tool result carries `_meta.tier` (the applied tier) and `_meta.token_count` (a real o200k_base count of the emitted text).
 
 ## Discovery

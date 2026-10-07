@@ -15,6 +15,11 @@
       "1": "hex to decimal + field rename",
       "2": "full: ABI decode (function/event + named args) + log collapse + logsBloom drop + hex to decimal"
     },
+    "tierSources": {
+      "_": "A tier number alone does not say WHO applied it. Every response from this server states `_meta.tier_source` beside `_meta.tier`.",
+      "proxy": "The tiers above, applied by the Ankr RPC proxy on the JSON-RPC path: ABI decode, log collapse, hex to decimal.",
+      "local": "Applied in the MCP server itself, on the Sui gRPC path, where no proxy is involved. 0 = the view's read_mask projection; 1 = lossless (ancestor echoes and empty containers dropped, repeated envelopes unwrapped, byte vectors rendered as text); 2 = 1 plus BCS blobs dropped, owners collapsed, repeated columns hoisted, collections grouped or keyed. There is no ABI decoding on this path, but there IS an `args` field: getLogs, suiWatchEvents and the pages expandResult continues carry each Move event's own struct, decoded by the node rather than from an ABI, under `args` — at every tier, tier 0 included. So `args` proves tier 2 only where tier_source is `proxy`; here `_meta.tier` is the only thing that does."
+    },
     "fullTier2Methods": [
       "eth_getBlockByHash",
       "eth_getBlockByNumber",
@@ -53,7 +58,15 @@
       "listChains",
       "resolveContract",
       "rpcCall",
-      "searchChain"
+      "searchChain",
+      "suiGetFunction",
+      "suiGetObjects",
+      "suiGetPackage",
+      "suiListDynamicFields",
+      "suiListOwnedObjects",
+      "suiResolveName",
+      "suiSimulateTransaction",
+      "suiWatchEvents"
     ]
   },
   "spec": "https://github.com/w3tech/torpc/blob/main/specs/evm-v1.md"
