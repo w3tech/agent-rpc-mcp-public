@@ -4,6 +4,12 @@ name: Publish to the MCP registry
 # deliberate act, not a side effect of a merge.
 on:
   workflow_dispatch:
+    inputs:
+      target:
+        description: Which entry to publish. A rerun after a partial publish names only the one that did not go out.
+        type: choice
+        options: [both, data, management]
+        default: both
 
 jobs:
   publish:
@@ -20,11 +26,33 @@ jobs:
 
       - name: Install the publisher
         run: |
-          curl -sSL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_amd64.tar.gz" \
+          curl -sSL "https://github.com/modelcontextprotocol/registry/releases/download/v1.8.1/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_amd64.tar.gz" \
             | tar xz mcp-publisher
+
+      # Release checklist, version fields. The registry refuses a version it has
+      # already published for that name:
+      #   server.json             .version              bump when publishing it
+      #   server.json             .packages[0].version  the npm release to run
+      #   server-management.json  .version              the deployed build, bump when publishing it
+      # A registry-only change ships as a prerelease of the NEXT version
+      # (0.2.5-0 after 0.2.4), which still sorts as latest.
+      - name: Check the npm version server.json points at exists
+        run: |
+          v=$(jq -r '.packages[0].version' server.json)
+          npm view "@w3tech.io/agent-rpc-mcp@$v" version | grep -qx "$v"
+
+      - name: Validate
+        run: |
+          ./mcp-publisher validate server.json
+          ./mcp-publisher validate server-management.json
 
       - name: Authenticate as the GitHub org
         run: ./mcp-publisher login github-oidc
 
-      - name: Publish
-        run: ./mcp-publisher publish
+      - name: Publish the data plane (/rpc)
+        if: inputs.target != 'management'
+        run: ./mcp-publisher publish server.json
+
+      - name: Publish the management plane (/mcp)
+        if: inputs.target != 'data'
+        run: ./mcp-publisher publish server-management.json

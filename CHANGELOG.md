@@ -14,6 +14,10 @@ under Unreleased. The format follows
 
 ### Added
 
+- `server-management.json`, a second registry entry, `io.github.w3tech/agent-rpc-mcp-management`,
+  for the management plane at `https://mcp.ankr.com/mcp` (OAuth sign-in).
+- The `https://mcp.ankr.com/rpc` remote in `server.json` declares the `Authorization` header
+  (`Bearer <Ankr API key>`), optional because a call without a key is paid over x402.
 - `server.json`, an MCP registry manifest in the `io.github.w3tech` namespace, declaring both ways
   to reach the server: the hosted endpoint at `https://mcp.ankr.com/rpc` and the npm package run as
   a local stdio process. Publishing the listing is a manual step rather than a side effect of a

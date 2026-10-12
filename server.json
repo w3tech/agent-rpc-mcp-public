@@ -3,7 +3,7 @@
   "name": "io.github.w3tech/agent-rpc-mcp",
   "title": "Ankr Agent RPC",
   "description": "Read chain data on 200+ networks and Sui: transactions, logs, balances, objects, ABI-decoded.",
-  "version": "0.2.4",
+  "version": "0.2.5-0",
   "websiteUrl": "https://www.ankr.com/web3-api/agent-rpc/",
   "repository": {
     "url": "https://github.com/w3tech/agent-rpc-mcp-public",
@@ -12,7 +12,23 @@
   "remotes": [
     {
       "type": "streamable-http",
-      "url": "https://mcp.ankr.com/rpc"
+      "url": "https://mcp.ankr.com/rpc",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Your Ankr API key as a Bearer token (x-ankr-api-key also works). Create a key at ankr.com/rpc. Without a key, tool calls are paid per call over x402.",
+          "isRequired": false,
+          "isSecret": true,
+          "value": "Bearer {ankr_api_key}",
+          "variables": {
+            "ankr_api_key": {
+              "description": "Ankr API key. Create one at ankr.com/rpc.",
+              "isRequired": false,
+              "isSecret": true
+            }
+          }
+        }
+      ]
     }
   ],
   "packages": [
