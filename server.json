@@ -3,7 +3,7 @@
   "name": "io.github.w3tech/agent-rpc-mcp",
   "title": "Ankr Agent RPC",
   "description": "Read chain data on 200+ networks and Sui: transactions, logs, balances, objects, ABI-decoded.",
-  "version": "0.2.5-0",
+  "version": "0.2.5",
   "websiteUrl": "https://www.ankr.com/web3-api/agent-rpc/",
   "repository": {
     "url": "https://github.com/w3tech/agent-rpc-mcp-public",
@@ -35,7 +35,7 @@
     {
       "registryType": "npm",
       "identifier": "@w3tech.io/agent-rpc-mcp",
-      "version": "0.2.4",
+      "version": "0.2.5",
       "transport": {
         "type": "stdio"
       },

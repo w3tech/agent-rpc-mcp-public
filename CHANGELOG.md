@@ -35,6 +35,14 @@ under Unreleased. The format follows
   can lag it.
 - A Links entry in the README pointing at the two discovery documents.
 
+## [0.2.5] - 2026-10-12
+
+### Changed
+
+- Every top-level tool input field has a description. `getTokenHolders` says holders come largest
+  balance first and that `balance` already has decimals applied; `getNFTs` and `getTokenHolders`
+  point to `getBalances` for a single wallet's tokens.
+- `server.json`, `server-management.json` and the Dockerfile pin move to 0.2.5.
 ## [0.2.2] - 2026-08-27
 
 ### Added
