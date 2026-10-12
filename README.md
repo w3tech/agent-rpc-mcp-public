@@ -14,7 +14,7 @@ Get a free API key at [ankr.com/rpc](https://www.ankr.com/rpc/).
 
 ### Hosted (no install)
 
-The server runs at `https://mcp.ankr.com/rpc`. Send your key as the `x-ankr-api-key` header; each request carries the caller's own key, and the server holds no credential of yours.
+The server runs at `https://mcp.ankr.com/rpc`. Send your key as the `x-ankr-api-key` header (or `Authorization: Bearer <key>`); each request carries the caller's own key, and the server holds no credential of yours.
 
 ```json
 {
