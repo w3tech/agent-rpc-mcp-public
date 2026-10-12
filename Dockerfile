@@ -15,7 +15,7 @@ FROM node:24-alpine
 
 # Pinned on purpose: an image that silently follows the latest release is not the
 # thing anyone reviewed.
-ARG VERSION=0.2.3
+ARG VERSION=0.2.5
 RUN npm install -g "@w3tech.io/agent-rpc-mcp@${VERSION}"
 
 # The package is installed as root; the server runs as the image's unprivileged
