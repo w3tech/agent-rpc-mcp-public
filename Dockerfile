@@ -16,7 +16,10 @@ FROM node:24-alpine
 # Pinned on purpose: an image that silently follows the latest release is not the
 # thing anyone reviewed.
 ARG VERSION=0.2.5
-RUN npm install -g "@w3tech.io/agent-rpc-mcp@${VERSION}"
+# npm is only needed to install; removing it drops its bundled dependencies,
+# and their advisories, from the image.
+RUN npm install -g "@w3tech.io/agent-rpc-mcp@${VERSION}" \
+ && rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx /root/.npm
 
 # The package is installed as root; the server runs as the image's unprivileged
 # node user.
