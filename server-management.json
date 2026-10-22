@@ -3,7 +3,7 @@
   "name": "io.github.w3tech/agent-rpc-mcp-management",
   "title": "Ankr Management MCP",
   "description": "Manage an Ankr RPC account: API keys, usage, allowlists, billing, teams. Sign in with OAuth.",
-  "version": "0.2.5",
+  "version": "0.2.7",
   "websiteUrl": "https://www.ankr.com/docs/rpc-service/getting-started/management-mcp/",
   "repository": {
     "url": "https://github.com/w3tech/agent-rpc-mcp-public",

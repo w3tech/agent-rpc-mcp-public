@@ -35,6 +35,23 @@ under Unreleased. The format follows
   can lag it.
 - A Links entry in the README pointing at the two discovery documents.
 
+## [0.2.7] - 2026-10-22
+
+### Changed
+
+- The stdio server starts without `ANKR_API_KEY`, so `tools/list` answers with no credential. Until
+  a key is set, every tool call returns `INVALID_KEY` with a link to get one. A blank
+  `ANKR_API_KEY` falls through to `ANKR_RPC_KEY`.
+- The Docker image no longer contains npm, which was only needed to install the package.
+- `server.json`, `server-management.json` and the Dockerfile pin move to 0.2.7.
+
+## [0.2.6] - 2026-10-22
+
+### Security
+
+- `@modelcontextprotocol/sdk` 1.31 -> 1.32.1, and updated dependencies that cleared the high and
+  medium npm advisories.
+
 ## [0.2.5] - 2026-10-12
 
 ### Changed
