@@ -11,7 +11,7 @@
 #
 #   docker build -t agent-rpc-mcp .
 #   docker run --rm -i -e ANKR_API_KEY=<key> agent-rpc-mcp
-FROM node:24-alpine
+FROM node:24.22.1-alpine
 
 # Pinned on purpose: an image that silently follows the latest release is not the
 # thing anyone reviewed.
