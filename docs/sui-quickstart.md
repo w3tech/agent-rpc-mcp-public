@@ -90,7 +90,7 @@ stdio server needs Node.js 24 or newer.
 
 `tools/list` returns 25 tools: 17 that work across EVM chains and the Advanced
 API, and 8 that are Sui-only. Six of the chain-generic ones take `chain: "sui"`
-and route themselves. The whole listing costs about 9050 o200k tokens, and it is
+and route themselves. The whole listing costs about 10700 o200k tokens, and it is
 carried by every session.
 
 **The eight Sui-only tools**
