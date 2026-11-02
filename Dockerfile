@@ -15,7 +15,7 @@ FROM node:24.22.1-alpine
 
 # Pinned on purpose: an image that silently follows the latest release is not the
 # thing anyone reviewed.
-ARG VERSION=0.2.7
+ARG VERSION=0.2.8
 # npm is only needed to install; removing it drops its bundled dependencies,
 # and their advisories, from the image.
 RUN npm install -g "@w3tech.io/agent-rpc-mcp@${VERSION}" \

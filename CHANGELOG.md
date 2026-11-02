@@ -35,6 +35,24 @@ under Unreleased. The format follows
   can lag it.
 - A Links entry in the README pointing at the two discovery documents.
 
+## [0.2.8] - 2026-11-02
+
+### Added
+
+- Every tool declares an `outputSchema` and returns its result as `structuredContent` as well as
+  text. The schemas name each result's top-level fields. Calls paid over x402 list no
+  `outputSchema`, so a payment-required answer still reaches the client.
+- `listChains` lists the vRPC endpoints per chain.
+
+### Changed
+
+- The `listChains` description is shorter.
+- `server.json`, `server-management.json` and the Dockerfile pin move to 0.2.8.
+
+### Security
+
+- Updated `zod`, `body-parser` and `follow-redirects` to clear the high npm advisories.
+
 ## [0.2.7] - 2026-10-22
 
 ### Changed
